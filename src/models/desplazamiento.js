@@ -42,8 +42,16 @@ const Desplazamiento = sequelize.define(
   { tableName: "Desplazamientos", timestamps: false }
 );
 
-sequelize.sync().then(() => {
-  console.log("La tabla Desplazamientos ha sido sincronizada");
-});
+sequelize
+  .sync()
+  .then(() => {
+    console.log("La tabla Desplazamientos ha sido sincronizada");
+  })
+  .catch((error) => {
+    console.error(
+      "Ocurrió un error al sincronizar la tabla Desplazamientos:",
+      error
+    );
+  });
 
 module.exports = Desplazamiento;

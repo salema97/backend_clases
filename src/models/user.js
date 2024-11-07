@@ -30,10 +30,6 @@ const User = sequelize.define(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        is: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
-        notEmpty: true,
-      },
     },
     isVerified: {
       type: DataTypes.BOOLEAN,
@@ -44,8 +40,13 @@ const User = sequelize.define(
   { tableName: "Users", timestamps: false }
 );
 
-sequelize.sync().then(() => {
-  console.log("La tabla Users ha sido sincronizada");
-});
+sequelize
+  .sync()
+  .then(() => {
+    console.log("La tabla Users ha sido sincronizada");
+  })
+  .catch((error) => {
+    console.error("Ocurrió un error al sincronizar la tabla Users:", error);
+  });
 
 module.exports = User;
