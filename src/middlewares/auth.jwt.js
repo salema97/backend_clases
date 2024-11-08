@@ -45,7 +45,7 @@ const createToken = async (user) => {
   }
 };
 
-const verifyToken = async (token) => {
+const verifyToken = (token) => {
   try {
     const secretWord = process.env.SECRET_WORD_TOKEN;
     const payload = jwt.verify(token, secretWord);
@@ -55,4 +55,50 @@ const verifyToken = async (token) => {
   }
 };
 
-module.exports = { encryptPassword, comparePassword, createToken, verifyToken };
+const verifyRole =
+  (...requireRoles) =>
+  (req, res, next) => {
+    try {
+      let token = req.headers["authorization"];
+
+      if (!token) {
+        return res
+          .status(403)
+          .json({ message: "No se proporciona ningún token" });
+      }
+
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7, token.length);
+      }
+
+      const payload = verifyToken(token);
+
+      if (!payload) {
+        return res.status(401).json({ message: "Token inválido" });
+      }
+
+      req.user = payload;
+
+      const userRoles = payload.roles;
+      const hasRole = requireRoles.some((role) => userRoles.includes(role));
+
+      if (!hasRole) {
+        return res.status(403).json({
+          message: "No tienes permisos para realizar esta acción",
+        });
+      }
+
+      next();
+    } catch (error) {
+      console.error("Ocurrió un error al verificar el rol:", error);
+      res.status(500).json({ message: "Ocurrió un error al verificar el rol" });
+    }
+  };
+
+module.exports = {
+  encryptPassword,
+  comparePassword,
+  createToken,
+  verifyToken,
+  verifyRole,
+};

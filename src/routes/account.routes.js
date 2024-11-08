@@ -6,5 +6,8 @@ const router = express.Router();
 
 router.post("/register", validatePassword, AccountController.register);
 router.post("/login", AccountController.login);
+// router.post("/login-google", AccountController.loginGoogle);
+
+router.get("/verify-email", AccountController.verifyEmail);
 
 module.exports = router;
