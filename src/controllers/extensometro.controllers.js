@@ -48,5 +48,3 @@ const obtenerExtensometrosIdZona = async (req, res) => {
 };
 
 module.exports = { crearExtensometro, obtenerExtensometrosIdZona };
-
-module.exports = { crearExtensometro, obtenerExtensometrosIdZona };

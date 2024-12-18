@@ -78,6 +78,8 @@ const updateZona = async (req, res) => {
 
     zona.name = name;
     await zona.save();
+
+    res.status(200).json(zona);
   } catch (error) {
     res
       .status(500)
@@ -96,7 +98,8 @@ const deleteZona = async (req, res) => {
     }
 
     await zona.destroy();
-    res.status(204).json({ message: `Zona ${id} fue eliminada correctamente` });
+
+    res.status(200).json({ message: `Zona ${id} fue eliminada correctamente` });
   } catch (error) {
     res
       .status(500)
