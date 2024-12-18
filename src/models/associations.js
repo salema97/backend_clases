@@ -25,4 +25,4 @@ Info.belongsTo(Extensometro, {
   as: "extensometro",
 });
 
-module.exports = { User, Role };
+module.exports = { User, Role, Zona, Extensometro, Info };

@@ -1,5 +1,3 @@
-const Validate = require("../utils/validates");
-
 const validateRegister = (req, res, next) => {
   try {
     const { userName, email, password } = req.body;

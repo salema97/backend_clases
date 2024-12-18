@@ -13,10 +13,6 @@ const Zona = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        is: /^[a-zA-Z]{3,10}$/,
-        notEmpty: true,
-      },
     },
   },
   { tableName: "Zonas", timestamps: false }
