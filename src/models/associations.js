@@ -18,11 +18,22 @@ Role.belongsToMany(User, {
 Zona.hasMany(Extensometro, {
   foreignKey: "zonaId",
   as: "extensometro",
+  onDelete: "CASCADE",
 });
-Extensometro.belongsTo(Zona, { foreignKey: "zonaId", as: "zona" });
+Extensometro.belongsTo(Zona, {
+  foreignKey: "zonaId",
+  as: "zona",
+  onDelete: "CASCADE",
+});
+Extensometro.hasMany(Info, {
+  foreignKey: "extensometroId",
+  as: "info",
+  onDelete: "CASCADE",
+});
 Info.belongsTo(Extensometro, {
   foreignKey: "extensometroId",
   as: "extensometro",
+  onDelete: "CASCADE",
 });
 
 module.exports = { User, Role, Zona, Extensometro, Info };

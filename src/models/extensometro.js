@@ -13,10 +13,6 @@ const Extensometro = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        is: /^[a-zA-Z]{3,10}$/,
-        notEmpty: true,
-      },
     },
   },
   { tableName: "Extensometros", timestamps: false }

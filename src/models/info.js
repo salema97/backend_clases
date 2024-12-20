@@ -39,7 +39,7 @@ const Info = sequelize.define(
       allowNull: false,
     },
   },
-  { tableName: "Infos", timestamps: false }
+  { tableName: "Infos" }
 );
 
 sequelize
