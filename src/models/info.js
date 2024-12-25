@@ -4,37 +4,37 @@ const sequelize = require("../database");
 const Info = sequelize.define(
   "Info",
   {
-    Id: {
+    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
       autoIncrement: true,
     },
-    TemperaturaMAX6675: {
+    temperaturaMAX6675: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    TemperaturaLM35: {
+    temperaturaLM35: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    HumedadRelativa: {
+    humedadRelativa: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    EsDia: {
+    esDia: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
-    CorrienteCS712: {
+    corrienteCS712: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    NivelBateria: {
+    nivelBateria: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    DesplazamientoLineal: {
+    desplazamientoLineal: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },

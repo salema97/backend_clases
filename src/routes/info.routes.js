@@ -1,8 +1,15 @@
 const express = require("express");
 const InfoController = require("../controllers/info.controllers");
+const { errorHandler } = require("../middlewares/error.interception");
+const {
+  validateExtensometro,
+  validateUpdateExtensometro,
+} = require("../middlewares/info.middleware");
 // const Auth = require("../middlewares/auth.jwt");
 
 const router = express.Router();
+
+router.use(errorHandler);
 
 router.get("/obtener-toda-info", InfoController.obtenerTodaInfo);
 
@@ -13,6 +20,14 @@ router.get(
 
 router.get("/obtener-info-por-id", InfoController.obtenerInfoPorId);
 
-router.post("/crear-info", InfoController.crearInfo);
+router.post("/crear-info", validateExtensometro, InfoController.crearInfo);
+
+router.put(
+  "/actualizar-info",
+  validateUpdateExtensometro,
+  InfoController.actualizarInfo
+);
+
+router.delete("/eliminar-info", InfoController.eliminarInfo);
 
 module.exports = router;

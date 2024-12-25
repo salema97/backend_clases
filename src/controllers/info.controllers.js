@@ -65,13 +65,13 @@ const crearInfo = async (req, res) => {
   try {
     const { extensometroId } = req.query;
     const {
-      TemperaturaMAX6675,
-      TemperaturaLM35,
-      HumedadRelativa,
-      EsDia,
-      CorrienteCS712,
-      NivelBateria,
-      DesplazamientoLineal,
+      temperaturaMAX6675,
+      temperaturaLM35,
+      humedadRelativa,
+      esDia,
+      corrienteCS712,
+      nivelBateria,
+      desplazamientoLineal,
     } = req.body;
 
     const extensometro = await Extensometro.findByPk(extensometroId);
@@ -83,13 +83,13 @@ const crearInfo = async (req, res) => {
     }
 
     const info = await Info.create({
-      TemperaturaMAX6675,
-      TemperaturaLM35,
-      HumedadRelativa,
-      EsDia,
-      CorrienteCS712,
-      NivelBateria,
-      DesplazamientoLineal,
+      temperaturaMAX6675,
+      temperaturaLM35,
+      humedadRelativa,
+      esDia,
+      corrienteCS712,
+      nivelBateria,
+      desplazamientoLineal,
       extensometroId,
     });
 
@@ -101,9 +101,58 @@ const crearInfo = async (req, res) => {
   }
 };
 
+const actualizarInfo = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const camposActualizados = req.body;
+
+    const info = await Info.findByPk(id);
+
+    if (!info) {
+      return res.status(404).json({ message: "No se encontró la información" });
+    }
+
+    Object.keys(camposActualizados).forEach((campo) => {
+      if (camposActualizados[campo] !== undefined) {
+        info[campo] = camposActualizados[campo];
+      }
+    });
+
+    await info.save();
+
+    res.status(200).json(info);
+  } catch (error) {
+    res.status(500).json({
+      message: `Hubo un error al actualizar la información: ${error}`,
+    });
+  }
+};
+
+const eliminarInfo = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const info = await Info.findByPk(id);
+
+    if (!info) {
+      return res.status(404).json({ message: "No se encontró la información" });
+    }
+
+    await info.destroy();
+
+    res.status(200).json({ message: "Información eliminada" });
+  } catch (error) {
+    res.status(500).json({
+      message: `Hubo un error al eliminar la información: ${error}`,
+    });
+  }
+};
+
 module.exports = {
   obtenerTodaInfo,
   obtenerInfoPorId,
   obtenerInfoPorExtensometroId,
   crearInfo,
+  actualizarInfo,
+  eliminarInfo,
 };

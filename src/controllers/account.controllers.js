@@ -2,11 +2,42 @@ const { User, Role } = require("../models/associations");
 const sequelize = require("../database");
 const Auth = require("../middlewares/auth.jwt");
 const EmailUtils = require("../utils/email.utils");
+require("dotenv").config();
+
+const registerDefaultAdmin = async () => {
+  try {
+    const userName = process.env.ADMIN_USER_NAME;
+    const email = process.env.ADMIN_EMAIL;
+    const password = process.env.ADMIN_PASSWORD;
+
+    const userExists = await User.findOne({ where: { email } });
+    if (userExists) {
+      console.log("El usuario admin ya existe");
+      return;
+    }
+
+    const hashPassword = await Auth.encryptPassword(password);
+
+    const newUser = await User.create({
+      userName,
+      email,
+      password: hashPassword,
+      isVerified: true,
+    });
+
+    const role = await Role.findOne({ where: { name: "admin" } });
+
+    await newUser.addRole(role);
+    console.log("Usuario admin creado correctamente");
+  } catch (error) {
+    console.log("Hubo un error al crear el usuario admin:", error);
+  }
+};
 
 const register = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { userName, email, password } = req.body;
+    const { userName, email, password, fingerprint } = req.body;
 
     const userExists = await User.findOne(
       { where: { email } },
@@ -21,9 +52,19 @@ const register = async (req, res) => {
     }
 
     const hashPassword = await Auth.encryptPassword(password);
+    const fingerprintHash = null;
+    if (fingerprint) {
+      fingerprintHash = await Auth.encryptPassword(fingerprint);
+    }
 
     const newUser = await User.create(
-      { userName, email, password: hashPassword, isVerified: false },
+      {
+        userName,
+        email,
+        password: hashPassword,
+        fingerprintHash,
+        isVerified: false,
+      },
       { transaction }
     );
 
@@ -93,6 +134,47 @@ const login = async (req, res) => {
   }
 };
 
+const loginFingerprint = async (req, res) => {
+  try {
+    const { fingerprint } = req.body;
+
+    const user = await User.findOne({
+      where: { fingerprint },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "No se encontró el usuario con la huella proporcionado.",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ message: "El correo electrónico no ha sido verificado." });
+    }
+
+    const validFingerprintHash = await Auth.comparePassword(
+      fingerprint,
+      user.fingerprintHash
+    );
+
+    if (!validFingerprintHash) {
+      return res.status(401).json({ message: "La huella es incorrecta." });
+    }
+
+    const token = await Auth.createToken(user);
+
+    res
+      .status(200)
+      .json({ userName: user.userName, email: user.email, token: token });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: `Hubo un error al iniciar sesión: ${error}` });
+  }
+};
+
 const loginGoogle = async (req, res) => {
   try {
     if (req.user) {
@@ -140,4 +222,11 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, loginGoogle, verifyEmail };
+module.exports = {
+  registerDefaultAdmin,
+  register,
+  login,
+  loginFingerprint,
+  loginGoogle,
+  verifyEmail,
+};

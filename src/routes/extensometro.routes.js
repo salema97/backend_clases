@@ -1,9 +1,12 @@
 const express = require("express");
 const ExtensometroController = require("../controllers/extensometro.controllers");
 const { validateName } = require("../middlewares/zona.middleware");
+const { errorHandler } = require("../middlewares/error.interception");
 // const Auth = require("../middlewares/auth.jwt");
 
 const router = express.Router();
+
+router.use(errorHandler);
 
 router.get(
   "/extensometros-todos-extensometros",
