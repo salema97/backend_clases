@@ -3,6 +3,7 @@ const Role = require("./roles");
 const Zona = require("./zona");
 const Extensometro = require("./extensometro");
 const Info = require("./info");
+const Device = require("./device");
 
 User.belongsToMany(Role, {
   through: "UserRoles",
@@ -34,6 +35,15 @@ Info.belongsTo(Extensometro, {
   foreignKey: "extensometroId",
   as: "extensometro",
   onDelete: "CASCADE",
+});
+
+User.hasMany(Device, {
+  foreignKey: "userId",
+  as: "devices",
+});
+Device.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
 });
 
 module.exports = { User, Role, Zona, Extensometro, Info };
