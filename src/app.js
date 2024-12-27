@@ -4,6 +4,7 @@ const InfoRoutes = require("./routes/info.routes");
 const AccountRoutes = require("./routes/account.routes");
 const ZonaRoutes = require("./routes/zona.routes");
 const ExtensometroRoutes = require("./routes/extensometro.routes");
+const NotificationRoutes = require("./routes/notification.routes");
 const UserRoutes = require("./routes/user.routes");
 const {
   errorHandler,
@@ -20,6 +21,7 @@ app.use("/api/user", UserRoutes);
 app.use("/api/zona", ZonaRoutes);
 app.use("/api/extensometro", ExtensometroRoutes);
 app.use("/api/info", InfoRoutes);
+app.use("/api/notification", NotificationRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

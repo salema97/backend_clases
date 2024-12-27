@@ -1,4 +1,4 @@
-const { User, Role } = require("../models/associations");
+const { User, Role, Device } = require("../models/associations");
 const sequelize = require("../database");
 const Auth = require("../middlewares/auth.jwt");
 const EmailUtils = require("../utils/email.utils");
@@ -97,7 +97,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, deviceId } = req.body;
 
     const user = await User.findOne({
       where: { email },
@@ -122,6 +122,22 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Contraseña incorrecta." });
     }
 
+    if (deviceId) {
+      const deviceExists = await Device.findOne({
+        where: { deviceId: deviceId },
+      });
+      if (deviceExists && deviceExists.userId !== user.id) {
+        await existingDevice.destroy();
+      }
+
+      const device = await Device.findOne({
+        where: { deviceId: deviceId, userId: user.id },
+      });
+      if (!device) {
+        await Device.create({ deviceId: deviceId, userId: user.id });
+      }
+    }
+
     const token = await Auth.createToken(user);
 
     res
@@ -136,7 +152,7 @@ const login = async (req, res) => {
 
 const loginFingerprint = async (req, res) => {
   try {
-    const { fingerprint } = req.body;
+    const { fingerprint, deviceId } = req.body;
 
     const user = await User.findOne({
       where: { fingerprint },
@@ -161,6 +177,22 @@ const loginFingerprint = async (req, res) => {
 
     if (!validFingerprintHash) {
       return res.status(401).json({ message: "La huella es incorrecta." });
+    }
+
+    if (deviceId) {
+      const deviceExists = await Device.findOne({
+        where: { deviceId: deviceId },
+      });
+      if (deviceExists && deviceExists.userId !== user.id) {
+        await existingDevice.destroy();
+      }
+
+      const device = await Device.findOne({
+        where: { deviceId: deviceId, userId: user.id },
+      });
+      if (!device) {
+        await Device.create({ deviceId: deviceId, userId: user.id });
+      }
     }
 
     const token = await Auth.createToken(user);
@@ -222,6 +254,57 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const token = await Auth.createTokenTemp(user);
+
+    EmailUtils.sendResetPasswordEmail(email, token);
+
+    res.status(200).json({ message: "Correo electrónico enviado" });
+  } catch (error) {
+    res.status(500).json({
+      message: `Hubo un error al restablecer la contraseña: ${error}`,
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { token } = req.query;
+    const { newPassword } = req.body;
+
+    const payload = Auth.verifyToken(token);
+
+    if (!payload) {
+      return res.status(401).json({ message: "Token inválido o expirado" });
+    }
+
+    const email = payload.email;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const hashPassword = await Auth.encryptPassword(newPassword);
+
+    await user.update({ password: hashPassword });
+
+    res.status(200).json({ message: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    res.status(500).json({
+      message: `Hubo un error al cambiar la contraseña: ${error}`,
+    });
+  }
+};
+
 module.exports = {
   registerDefaultAdmin,
   register,
@@ -229,4 +312,6 @@ module.exports = {
   loginFingerprint,
   loginGoogle,
   verifyEmail,
+  resetPassword,
+  changePassword,
 };

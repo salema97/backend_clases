@@ -30,4 +30,8 @@ router.get(
 
 router.get("/verify-email", AccountController.verifyEmail);
 
+router.post("/reset-password", AccountController.resetPassword);
+
+router.post("/change-password", AccountController.changePassword);
+
 module.exports = router;

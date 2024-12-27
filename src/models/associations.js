@@ -46,4 +46,4 @@ Device.belongsTo(User, {
   as: "user",
 });
 
-module.exports = { User, Role, Zona, Extensometro, Info };
+module.exports = { User, Role, Zona, Extensometro, Info, Device };
