@@ -127,7 +127,7 @@ const login = async (req, res) => {
         where: { deviceId: deviceId },
       });
       if (deviceExists && deviceExists.userId !== user.id) {
-        await existingDevice.destroy();
+        await deviceExists.destroy();
       }
 
       const device = await Device.findOne({
