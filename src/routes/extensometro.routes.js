@@ -9,7 +9,7 @@ const router = express.Router();
 router.use(errorHandler);
 
 router.get(
-  "/extensometros-todos-extensometros",
+  "/obtener-todos-extensometros",
   ExtensometroController.obtenerExtensometros
 );
 
