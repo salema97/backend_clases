@@ -209,19 +209,94 @@ const loginFingerprint = async (req, res) => {
 
 const loginGoogle = async (req, res) => {
   try {
-    if (req.user) {
-      const token = await Auth.createToken(req.user);
-      res.status(200).json({
-        userName: req.user.userName,
-        email: req.user.email,
-        token: token,
+    const { profile, deviceId } = req.body;
+
+    if (!profile || !profile._json || !profile._json.email) {
+      return res.status(400).json({ message: "Perfil de Google inválido" });
+    }
+
+    const email = profile._json.email;
+    let user = await User.findOne({ where: { email } });
+
+    if (user) {
+      if (deviceId) {
+        const deviceExists = await Device.findOne({
+          where: { deviceId: deviceId },
+        });
+        if (deviceExists && deviceExists.userId !== user.id) {
+          await deviceExists.destroy();
+        }
+
+        const device = await Device.findOne({
+          where: { deviceId: deviceId, userId: user.id },
+        });
+        if (!device) {
+          await Device.create({ deviceId: deviceId, userId: user.id });
+        }
+      }
+
+      const token = await Auth.createToken(user);
+      return res.status(200).json({
+        userName: user.userName,
+        email: user.email,
+        token,
       });
-    } else {
-      res.status(401).json({ message: "No se pudo iniciar sesión con Google" });
+    }
+
+    const transaction = await sequelize.transaction();
+    try {
+      const newUser = await User.create(
+        {
+          userName: profile._json.name,
+          email,
+          isVerified: true,
+        },
+        { transaction }
+      );
+
+      const roleUser = await Role.findOne(
+        { where: { name: "user" } },
+        { transaction }
+      );
+
+      if (!roleUser) {
+        throw new Error("Rol de usuario no encontrado");
+      }
+
+      await newUser.addRole(roleUser, { transaction });
+      await transaction.commit();
+
+      if (deviceId) {
+        const deviceExists = await Device.findOne({
+          where: { deviceId: deviceId },
+        });
+        if (deviceExists && deviceExists.userId !== newUser.id) {
+          await deviceExists.destroy();
+        }
+
+        const device = await Device.findOne({
+          where: { deviceId: deviceId, userId: newUser.id },
+        });
+        if (!device) {
+          await Device.create({ deviceId: deviceId, userId: newUser.id });
+        }
+      }
+
+      const token = await Auth.createToken(newUser);
+      return res.status(201).json({
+        userName: newUser.userName,
+        email: newUser.email,
+        token,
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
   } catch (error) {
-    res.status(500).json({
-      message: `Hubo un error al iniciar sesión con Google: ${error}`,
+    console.error("Error en loginGoogle:", error);
+    return res.status(500).json({
+      message: "Error al procesar el inicio de sesión con Google",
+      error: error.message,
     });
   }
 };
