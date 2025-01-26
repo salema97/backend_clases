@@ -61,4 +61,37 @@ const sendResetPasswordEmail = async (email, token) => {
   }
 };
 
-module.exports = { sendVerifyEmail, sendResetPasswordEmail };
+const sendReportEmail = async (email, pdfBuffer) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: process.env.EMAIL_SECURE,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Reporte de Extensómetro",
+      text: "Adjunto encontrará el reporte generado del extensómetro.",
+      attachments: [
+        {
+          filename: "reporte.pdf",
+          content: pdfBuffer,
+        },
+      ],
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Reporte enviado a ${email}: ${info.messageId}`);
+  } catch (error) {
+    console.error("Error al enviar el reporte por correo:", error);
+    throw error;
+  }
+};
+
+module.exports = { sendVerifyEmail, sendResetPasswordEmail, sendReportEmail };

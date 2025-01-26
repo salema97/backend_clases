@@ -129,4 +129,7 @@ const sendNotificationToAll = async (req, res) => {
   }
 };
 
-module.exports = { sendNotification, sendNotificationToAll };
+module.exports = {
+  sendNotification,
+  sendNotificationToAll,
+};

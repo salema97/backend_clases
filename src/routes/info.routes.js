@@ -5,6 +5,7 @@ const {
   validateExtensometro,
   validateUpdateExtensometro,
 } = require("../middlewares/info.middleware");
+const { route } = require("./account.routes");
 // const Auth = require("../middlewares/auth.jwt");
 
 const router = express.Router();
@@ -29,5 +30,7 @@ router.put(
 );
 
 router.delete("/eliminar-info", InfoController.eliminarInfo);
+
+router.post("/generar-reporte", InfoController.generarReporte);
 
 module.exports = router;
